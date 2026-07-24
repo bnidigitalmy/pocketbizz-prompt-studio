@@ -25,7 +25,7 @@
   .tab.active{background:#fff;color:var(--purple)}
   .note{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:10px 14px;border-radius:10px;
     font-size:12.5px;margin:16px 0}
-  details.ref{background:#fff;border:1px solid var(--line);border-radius:12px;margin:16px 0;overflow:hidden}
+  details.ref,section.gen{background:#fff;border:1px solid var(--line);border-radius:12px;margin:16px 0;overflow:hidden}
   details.ref summary{cursor:pointer;padding:14px 16px;font-weight:700;font-size:14px;background:#f6f2fc;color:var(--purple-deep);list-style:none}
   details.ref summary::-webkit-details-marker{display:none}
   details.ref summary::before{content:"▸ ";}
@@ -34,9 +34,16 @@
   .refblock{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px}
   .refblock h4{font-size:12.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--purple);margin-bottom:6px}
   .refblock p{font-size:12px;color:#555;white-space:pre-wrap}
+  section.gen{padding:16px}
+  section.gen h2{font-size:15px;color:var(--purple-deep);margin-bottom:4px}
+  section.gen p{font-size:12.5px;color:#666;margin-bottom:10px}
+  textarea#rawInput{width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:12px;
+    font-size:12.5px;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical;color:#333}
+  .genbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .epsec{margin-top:26px}
-  .ephead{font-size:17px;font-weight:800;color:var(--purple-deep);padding:6px 0;border-bottom:2px solid var(--line);margin-bottom:14px}
+  .ephead{font-size:17px;font-weight:800;color:var(--purple-deep);padding:6px 0;border-bottom:2px solid var(--line);margin-bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
   .ephead small{display:block;font-weight:500;color:#888;font-size:12.5px;margin-top:2px}
+  .ephead .genflag{font-size:11px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;padding:3px 8px;border-radius:20px;white-space:nowrap}
   .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;
     box-shadow:0 1px 3px rgba(30,41,59,.04)}
   .card .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:8px}
@@ -59,8 +66,9 @@
     font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
   button.copy:hover{background:var(--purple-deep)}
   button.copy.ghost{background:#fff;color:var(--purple);border:1.5px solid var(--purple)}
-  button.copy.ok{background:var(--green)!important}
-  .promptbox{display:none;margin-top:10px;font-size:11.5px;color:#555;background:#0f172a;color:#cbd5e1;
+  button.copy.danger{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+  button.copy.ok{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
+  .promptbox{display:none;margin-top:10px;font-size:11.5px;background:#0f172a;color:#cbd5e1;
     padding:12px;border-radius:8px;white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.45}
   .promptbox.show{display:block}
   footer{text-align:center;font-size:12px;color:#999;margin-top:30px}
@@ -70,27 +78,39 @@
 <header>
   <div class="wrap">
     <h1>🎬 PocketBizz Prompt Studio</h1>
-    <p>Klik <b>Copy Prompt</b> pada mana-mana scene → paste terus ke Google Flow. Watak & environment sudah tertanam untuk konsistensi.</p>
+    <p>Klik <b>Copy Prompt</b> pada mana-mana scene → paste ke Google Flow. Watak &amp; environment sudah tertanam untuk konsistensi.</p>
     <div class="tabs" id="tabs"></div>
   </div>
 </header>
 
 <div class="wrap">
   <div class="note">
-    ⚠️ <b>Nota:</b> Watak <b>Nurul</b> &amp; <b>Bizz</b> ikut character sheet rasmi. <b>Amir</b> (suami, Ep 4) belum ada sheet rasmi — identiti di bawah adalah <b>sementara</b> supaya dia stabil; kemas kini bila art Amir siap. Pelanggan sengaja dibuat ringkas (boleh berbeza-beza).
+    ⚠️ <b>Nota:</b> Watak <b>Nurul</b> &amp; <b>Bizz</b> ikut character sheet rasmi. <b>Amir</b> (Ep 4) identiti <b>sementara</b>. Pelanggan sengaja ringkas.
   </div>
+
+  <section class="gen">
+    <h2>➕ Jana Episod Baru dari ChatGPT</h2>
+    <p>Paste teks episod penuh dari ChatGPT (format scene-by-scene), klik <b>Jana</b>. Sistem auto-pecah scene &amp; hasilkan prompt Google Flow. Episod dijana disimpan dalam browser ni (localStorage) — kekal walau tutup.</p>
+    <textarea id="rawInput" placeholder="Paste teks episod dari ChatGPT di sini... (contoh: '# Season 1 • Episod 6 ... # Scene 1 – ... (5 saat) ...')"></textarea>
+    <div class="genbtns">
+      <button class="copy" id="genBtn">⚙️ Jana &amp; Simpan</button>
+      <button class="copy ghost" id="clearInput">Kosongkan Input</button>
+      <button class="copy danger" id="clearGen">🗑 Padam Semua Episod Dijana</button>
+    </div>
+  </section>
 
   <details class="ref">
     <summary>📌 Blok Watak &amp; Environment Tetap (rujukan — dah termasuk dalam setiap prompt)</summary>
     <div class="refbody" id="refbody"></div>
   </details>
 
+  <div id="genEpisodes"></div>
   <div id="episodes"></div>
-  <footer>PocketBizz Asset Library · Google Flow Prompt Studio · Season 1</footer>
+  <footer>PocketBizz Asset Library · Google Flow Prompt Studio V2 · Season 1</footer>
 </div>
 
 <script>
-/* ---------- BLOK TETAP ---------- */
+/* ==================== BLOK TETAP ==================== */
 const IDENT = {
   nurul: 'Nurul "Kak Bizz", a 32-year-old Malaysian Malay Muslim home baker from Alor Setar, petite (158 cm), warm oval face, light tan skin, large expressive dark brown eyes, soft natural smile, matte nude instant hijab, cream long-sleeve blouse, purple PocketBizz apron with the PocketBizz "B" logo, long cream skirt, white sneakers and a white smartwatch, ultra-consistent character design.',
   bizz: 'Bizz, the official PocketBizz AI assistant: a floating rounded matte-white robot with a glossy black OLED face, large expressive blue-to-purple LED eyes, a small antenna with a glowing purple orb, and a glowing PocketBizz "B" Energy Core in its chest, hovering 20-30 cm above the surface on a soft purple-blue energy field with subtle particles, ultra-consistent character design.',
@@ -108,235 +128,143 @@ const CORE = {
   orange:'Bizz\'s chest Energy Core glows orange (warning).',
   red:'Bizz\'s chest Energy Core glows red (critical).'
 };
+const coreLabel={purple:'💜 Core Ungu',blue:'🔵 Core Biru',green:'🟢 Core Hijau',orange:'🟠 Core Oren',red:'🔴 Core Merah',none:'— tiada Bizz'};
 
-/* ---------- DATA SCENE ---------- */
-const EPISODES = [
- {ep:1,title:'Tempahan Yang Hilang',feature:'Order Management',scenes:[
-   {n:1,t:'Pagi Yang Tenang',dur:'5s',chars:['nurul','bizz'],core:'purple',
-    action:'at the cake decorating island, Kak Bizz focuses on decorating a chocolate drip cake while Bizz floats gently just above the counter watching her calmly.',
-    camera:'Medium shot, slow push in',light:'Warm morning window light',
-    dialog:[{who:'Bizz',line:'Selamat pagi, Kak Bizz! Hari ni nampak tenang.'},{who:'Kak Bizz',line:'Harap-harap macam tu lah.'}]},
-   {n:2,t:'Telefon Mula Berbunyi',dur:'5s',chars:['nurul'],core:'purple',
-    action:'the smartphone on the counter rings repeatedly with WhatsApp notifications; Kak Bizz pauses decorating and glances at the phone, mildly surprised.',
-    camera:'Close-up on the phone then her face',light:'Warm morning light',
-    dialog:[{who:'Kak Bizz',line:'Eh... ramai pula WhatsApp pagi ni.'}]},
-   {n:3,t:'Kekeliruan Bermula',dur:'6s',chars:['nurul','bizz'],core:'orange',
-    action:'the WhatsApp screen is full of overlapping customer messages about cake orders; Kak Bizz starts to look worried while Bizz observes the situation.',
-    camera:'Over-shoulder on phone, slight push in',light:'Light softening cooler',
-    dialog:[{who:'Customer',line:'Kak, kek saya pukul 10 ya?'},{who:'Customer',line:'Deposit dah transfer.'},{who:'Customer',line:'Saya nak tambah satu lagi.'}]},
-   {n:4,t:'Semua Berselerak',dur:'6s',chars:['nurul'],core:'none',
-    action:'a messy desk with a notebook, sticky notes, a calendar and the WhatsApp phone all open at once, getting more cluttered; Kak Bizz\'s hands moving between them anxiously.',
-    camera:'Top view of the cluttered table',light:'Cool grey overcast',
-    vo:'Bila semuanya disimpan di tempat yang berbeza... mudah sangat ada yang tertinggal.'},
-   {n:5,t:'Customer Dah Sampai',dur:'5s',chars:['nurul'],core:'none',
-    action:'the phone rings; Kak Bizz looks at the table where a cake is still unfinished, then freezes, stunned.',
-    camera:'Zoom into her worried face',light:'Cool grey',
-    dialog:[{who:'Customer',line:'Kak... saya dah sampai.'}]},
-   {n:6,t:'Bizz Muncul Membantu',dur:'7s',chars:['nurul','bizz'],core:'blue',
-    action:'Bizz emerges as a hologram from the phone beside Kak Bizz and a PocketBizz dashboard appears, orders automatically sorting into a clean list.',
-    camera:'Medium 2-shot, slow orbit',light:'Warm light with cool blue glow',
-    dialog:[{who:'Bizz',line:'Tak apa Kak Bizz.'},{who:'Bizz',line:'Jom kita urus satu-satu.'}]},
-   {n:7,t:'Operasi Bermula',dur:'8s',chars:['nurul','bizz'],core:'blue',
-    action:'Bizz points at a holographic dashboard checklist (Tempahan, Deposit, Prioriti, Masa siap) and Kak Bizz works through the list in a fast montage.',
-    camera:'Over-shoulder on dashboard + medium montage',light:'Bright neutral',
-    dialog:[{who:'Bizz',line:'Ikut senarai ni, semua terkawal.'}]},
-   {n:8,t:'Semua Berjalan Lancar',dur:'7s',chars:['nurul','bizz','customer'],core:'green',
-    action:'the cake is finished and packed; a customer smiles receiving her cake box, Bizz gives a thumbs-up and Kak Bizz smiles with relief.',
-    camera:'Medium at pickup counter',light:'Warm golden',
-    dialog:[{who:'Kak Bizz',line:'Alhamdulillah, siap juga.'}]},
-   {n:9,t:'Penutup',dur:'6s',chars:['nurul','bizz'],core:'green',
-    action:'Kak Bizz closes the bakery door, looks at her phone and Bizz waves cheerfully; she laughs softly.',
-    camera:'Medium, slow pull out',light:'Golden hour',
-    dialog:[{who:'Bizz',line:'Misi hari ini selesai.'}]},
-   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',
-    action:'night time; Kak Bizz is about to rest when the phone chimes with a new order; she looks at Bizz who smiles knowingly, then the screen fades to black.',
-    camera:'Close-up, static',light:'Warm night interior',
-    dialog:[{who:'Bizz',line:'Esok... kita ada cabaran baru.'}]}
- ]},
-
- {ep:2,title:'Deposit Dah Masuk... Ke Belum?',feature:'Deposit & Payment Status',scenes:[
-   {n:1,t:'Hook',dur:'5s',chars:['nurul'],core:'purple',
-    action:'morning; Kak Bizz is assembling a tiered birthday cake when the phone chimes with a customer message showing a reference photo; she smiles.',
-    camera:'Medium, static',light:'Warm morning light',
-    dialog:[{who:'Customer',line:'Kak, saya nak kek macam gambar ni ya.'},{who:'Kak Bizz',line:'InsyaAllah boleh.'}]},
-   {n:2,t:'Tempahan Disahkan',dur:'6s',chars:['nurul'],core:'none',
-    action:'the customer sends order details (date, name, cake design); Kak Bizz writes them into her notebook and nods.',
-    camera:'Medium + insert of notebook',light:'Warm neutral',
-    dialog:[{who:'Customer',line:'Saya transfer deposit nanti ya.'},{who:'Kak Bizz',line:'Baik.'}]},
-   {n:3,t:'Hari Semakin Sibuk',dur:'7s',chars:['nurul','bizz'],core:'purple',
-    action:'a busy montage: the mixer spins, a cake is decorated, WhatsApp messages arrive, the phone rings, Bizz watches calmly from above the counter.',
-    camera:'Quick montage cuts',light:'Warm daytime',
-    dialog:[]},
-   {n:4,t:'Hari Pengambilan',dur:'8s',chars:['nurul','customer'],core:'none',
-    action:'a customer arrives smiling at the pickup counter; Kak Bizz picks up the cake box, then suddenly pauses, uncertain, touching her chin.',
-    camera:'Medium 2-shot then close-up',light:'Neutral daylight',
-    dialog:[{who:'Customer',line:'Kak, saya datang ambil kek.'},{who:'Kak Bizz',line:'Err... deposit dah masuk ke belum?'}]},
-   {n:5,t:'Mula Keliru',dur:'8s',chars:['nurul'],core:'none',
-    action:'Kak Bizz nervously opens WhatsApp, online banking and her notebook one by one, checking each, getting more panicked.',
-    camera:'Close-up, slow push in',light:'Cool grey',
-    vo:'Bila semua pembayaran disimpan di tempat berbeza... memang mudah terlupa.'},
-   {n:6,t:'Bizz Membantu',dur:'8s',chars:['nurul','bizz'],core:'blue',
-    action:'Bizz floats in beside the phone and projects the PocketBizz dashboard showing the payment status clearly marked "Deposit belum diterima", explaining calmly.',
-    camera:'Over-shoulder on dashboard',light:'Cool with blue glow',
-    dialog:[{who:'Bizz',line:'Tak mengapa, Kak Bizz. Mari saya semak.'}]},
-   {n:7,t:'Penyelesaian',dur:'8s',chars:['nurul','bizz','customer'],core:'green',
-    action:'Kak Bizz smiles warmly at the customer, who scans a QR code to pay; the PocketBizz status flips to "Deposit diterima" with a green tick and Bizz\'s Core turns green.',
-    camera:'Medium at counter + insert of QR',light:'Warming light',
-    dialog:[{who:'Kak Bizz',line:'Tak apa ya. Deposit belum direkodkan lagi. Boleh buat pembayaran sekarang.'},{who:'Bizz',line:'Pembayaran berjaya direkodkan.'}]},
-   {n:8,t:'Penutup',dur:'7s',chars:['nurul','bizz'],core:'green',
-    action:'the customer leaves happily with the cake; Kak Bizz breathes a sigh of relief with Bizz floating beside her.',
-    camera:'Medium, slow pull out',light:'Warm golden',
-    dialog:[{who:'Bizz',line:'Satu lagi urusan selesai.'}]},
-   {n:9,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'orange',
-    action:'night; Kak Bizz is tidying the kitchen when a PocketBizz notification chimes: "Stok whipping cream tinggal 1 unit"; she looks at Bizz who smiles gently.',
-    camera:'Medium, static',light:'Warm night interior',
-    dialog:[{who:'Bizz',line:'Nampaknya... esok kita ada misi baru.'}]}
- ]},
-
- {ep:3,title:'Alamak... Tepung Dah Habis!',feature:'Inventory + Low Stock Alert',scenes:[
-   {n:1,t:'Cold Open',dur:'5s',chars:['nurul','bizz'],core:'orange',
-    action:'morning; Kak Bizz arranges ingredients on the table while Bizz floats near the raw-material shelves, its Core turning slightly orange.',
-    camera:'Wide, slow push in',light:'Warm morning light',
-    dialog:[{who:'Bizz',line:'Selamat pagi, Kak Bizz. Ada satu perkara yang perlu diberi perhatian.'}]},
-   {n:2,t:'Tempahan Besar Masuk',dur:'7s',chars:['nurul','customerCorp'],core:'none',
-    action:'the phone chimes with a corporate order for 10 cakes for a company event; Kak Bizz smiles happily and taps "Terima Tempahan" in the PocketBizz app.',
-    camera:'Medium + insert of app',light:'Warm daytime',
-    dialog:[{who:'Kak Bizz',line:'Alhamdulillah... rezeki pagi ni.'}]},
-   {n:3,t:'Semakan Stok',dur:'7s',chars:['nurul'],core:'none',
-    action:'Kak Bizz goes to the ingredient shelf, picks up a flour container that is nearly empty, opens another that is empty, and her face changes with concern.',
-    camera:'Medium + ECU on empty container',light:'Cooling light',
-    dialog:[{who:'Kak Bizz',line:'Eh... tinggal sikit je?'}]},
-   {n:4,t:'AI Alert',dur:'8s',chars:['nurul','bizz'],core:'orange',
-    action:'Bizz projects a holographic Low Stock Alert listing: flour very low, whipping cream critical, butter low; its Core glows orange.',
-    camera:'Over-shoulder on hologram',light:'Cool with orange alert glow',
-    dialog:[{who:'Bizz',line:'Nasib baik kita semak sebelum mula.'}]},
-   {n:5,t:'Makin Cemas',dur:'8s',chars:['nurul'],core:'none',
-    action:'Kak Bizz looks at the clock (supplier not open yet, order due tomorrow), sits down for a moment and sighs.',
-    camera:'Close-up, slow push in',light:'Deep cool',
-    vo:'Kadang-kadang bukan tak cukup pelanggan... tetapi stok yang tak cukup.'},
-   {n:6,t:'Penyelesaian',dur:'9s',chars:['nurul','bizz'],core:'green',
-    action:'Bizz opens the Inventory module and a purchase suggestion list appears (flour 25kg, butter, whipping cream) with quantities based on the accepted order.',
-    camera:'Over-shoulder on hologram',light:'Warming with blue glow',
-    dialog:[{who:'Bizz',line:'Senarai pembelian dah siap. Jom kita pergi supplier.'}]},
-   {n:7,t:'Montaj',dur:'8s',chars:['nurul','bizz'],core:'blue',
-    action:'a cinematic montage: Kak Bizz buys stock, pushes a trolley, lifts flour, arranges stock on the shelves while Bizz scans each item and PocketBizz auto-updates the inventory.',
-    camera:'Tracking + inserts',light:'Daytime bright',
-    dialog:[]},
-   {n:8,t:'Bakery Kembali Hidup',dur:'7s',chars:['nurul','bizz'],core:'green',
-    action:'next day; ingredients are fully stocked, the mixer spins, cakes bake and Kak Bizz smiles confidently.',
-    camera:'Wide, slow push in',light:'Warm morning',
-    dialog:[{who:'Bizz',line:'Sekarang kita dah bersedia.'}]},
-   {n:9,t:'Penutup',dur:'6s',chars:['nurul','customerCorp'],core:'none',
-    action:'ten cakes are ready; the corporate customer collects them looking satisfied; Kak Bizz looks at the neatly organized shelves and nods with relief.',
-    camera:'Medium at counter',light:'Golden hour',
-    dialog:[]},
-   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'blue',
-    action:'night; Kak Bizz sits at the office corner opening a sales report, frowning in confusion while Bizz looks at the dashboard.',
-    camera:'Medium, static',light:'Warm night interior',
-    dialog:[{who:'Kak Bizz',line:'Jualan banyak... tapi untung mana?'},{who:'Bizz',line:'Mungkin kita perlu semak kos sebenar.'}]}
- ]},
-
- {ep:4,title:'Jualan Banyak... Untung Ke Mana?',feature:'Profit & Loss / Costing',scenes:[
-   {n:1,t:'Cold Open',dur:'5s',chars:['nurul'],core:'none',
-    action:'night; the quiet bakery, Kak Bizz sits at the office corner holding a coffee, opens her banking app then PocketBizz, looking confused.',
-    camera:'Medium, slow push in',light:'Cool dim night',
-    dialog:[{who:'Kak Bizz',line:'Order banyak... tapi duit macam tak bertambah pun...'}]},
-   {n:2,t:'Suami Masuk',dur:'7s',chars:['nurul','amir'],core:'none',
-    action:'Amir enters carrying two cups of coffee and sits beside Kak Bizz warmly; she gives a thin smile.',
-    camera:'Medium 2-shot',light:'Warm night interior',
-    dialog:[{who:'Amir',line:'Alhamdulillah... bulan ni ramai order kan?'}]},
-   {n:3,t:'Soalan Yang Susah Dijawab',dur:'8s',chars:['nurul','amir'],core:'none',
-    action:'Amir looks at the dashboard and calmly asks a hard question; Kak Bizz goes silent, unsure how to answer, a quiet moment.',
-    camera:'Close-up on her face',light:'Warm dim',
-    dialog:[{who:'Amir',line:'Jadi... untung bulan ni berapa?'}]},
-   {n:4,t:'Agitate',dur:'8s',chars:['nurul'],core:'none',
-    action:'fast visuals of expenses being paid: flour, butter, cake boxes, electricity, gas, part-time worker — money flowing out.',
-    camera:'Fast insert montage',light:'Neutral',
-    vo:'Kadang-kadang kita ingat semua duit yang masuk itu untung... sedangkan sebahagian besar ialah kos.'},
-   {n:5,t:'Bizz Membantu',dur:'8s',chars:['nurul','amir','bizz'],core:'blue',
-    action:'Bizz appears and projects a simple, easy-to-read Profit & Loss dashboard as a hologram beside them.',
-    camera:'Medium 3-shot, slow orbit',light:'Warm with blue glow',
-    dialog:[{who:'Bizz',line:'Jom kita lihat gambaran sebenar.'}]},
-   {n:6,t:'Pendedahan',dur:'10s',chars:['nurul','bizz'],core:'blue',
-    action:'Bizz reveals a clear holographic summary — Jualan RM18,450, Kos Bahan RM8,700, Pembungkusan RM1,250, Utiliti RM620, Untung Bersih RM7,880 — and Kak Bizz understands.',
-    camera:'Over-shoulder on hologram',light:'Warm with blue accents',
-    dialog:[{who:'Kak Bizz',line:'Oh... patutlah...'}]},
-   {n:7,t:'AI Insight',dur:'8s',chars:['nurul','bizz'],core:'purple',
-    action:'Bizz shows gentle suggestions about rising cake-box costs and higher premium-cake margins; Kak Bizz nods thoughtfully.',
-    camera:'Medium, static',light:'Warm',
-    dialog:[{who:'Bizz',line:'Kos kotak kek meningkat 18%. Margin kek premium lebih tinggi. Mungkin harga perlu dikaji semula.'}]},
-   {n:8,t:'Perubahan',dur:'7s',chars:['nurul'],core:'none',
-    action:'a montage: Kak Bizz reviews her menu prices, updates ingredient costs and checks the daily report in PocketBizz, now more confident.',
-    camera:'Inserts + medium',light:'Warm daytime',
-    dialog:[]},
-   {n:9,t:'Penutup',dur:'6s',chars:['nurul','amir'],core:'none',
-    action:'next morning; Amir asks again how the month is going and Kak Bizz answers confidently with a smile; Amir looks proud.',
-    camera:'Medium 2-shot',light:'Warm morning',
-    dialog:[{who:'Amir',line:'Macam mana bulan ni?'},{who:'Kak Bizz',line:'Alhamdulillah... sekarang saya tahu untung sebenar.'}]},
-   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',
-    action:'the phone rings with a customer asking to change the cake design, though the cake is already half done; Kak Bizz looks at Bizz who gives a small knowing smile.',
-    camera:'Medium, static',light:'Warm interior',
-    dialog:[{who:'Customer',line:'Kak... boleh tukar design kek saya?'},{who:'Bizz',line:'Nampaknya... ada cabaran baru.'}]}
- ]},
-
- {ep:5,title:'Boleh Tukar Design Ke?',feature:'Order Revision / History',scenes:[
-   {n:1,t:'Cold Open',dur:'5s',chars:['nurul','bizz'],core:'purple',
-    action:'a busy morning; Kak Bizz decorates a nearly-finished floral-theme cake while Bizz watches happily.',
-    camera:'Medium, slow push in',light:'Warm morning',
-    dialog:[{who:'Bizz',line:'Cantik hasilnya, Kak Bizz.'}]},
-   {n:2,t:'Mesej Mengejutkan',dur:'6s',chars:['nurul'],core:'none',
-    action:'the phone chimes with a WhatsApp; Kak Bizz reads it twice and glances at the almost-finished cake in front of her.',
-    camera:'Close-up on phone + her reaction',light:'Warm neutral',
-    dialog:[{who:'Customer',line:'Kak... saya nak tukar design boleh?'}]},
-   {n:3,t:'Permintaan Bertambah',dur:'8s',chars:['nurul'],core:'none',
-    action:'the customer sends a new reference photo and asks to change the colour and the writing too; Kak Bizz takes a long, deep breath.',
-    camera:'Medium, static',light:'Cool grey',
-    dialog:[{who:'Customer',line:'Yang ni lagi cantik. Warna pun nak tukar ya. Tulisan pun tukar sekali.'}]},
-   {n:4,t:'Agitate',dur:'8s',chars:['nurul','bizz'],core:'none',
-    action:'a montage: Kak Bizz looks at the clock, four other orders are waiting, and Bizz displays today\'s schedule almost fully booked.',
-    camera:'Inserts + over-shoulder schedule',light:'Neutral cool',
-    vo:'Bukan semua perubahan boleh dibuat pada saat akhir. Kadang-kadang satu perubahan kecil memberi kesan kepada tempahan lain.'},
-   {n:5,t:'Bizz Menganalisis',dur:'8s',chars:['nurul','bizz'],core:'blue',
-    action:'Bizz activates a hologram showing order status 95% done, 30 minutes to pickup, next order in 45 minutes, and explains the impact calmly.',
-    camera:'Over-shoulder on hologram',light:'Cool with blue glow',
-    dialog:[{who:'Bizz',line:'Jika design ditukar sekarang, dua tempahan lain akan lewat.'}]},
-   {n:6,t:'Penyelesaian Profesional',dur:'9s',chars:['nurul'],core:'none',
-    action:'Kak Bizz calls the customer and gently offers a fair compromise, staying calm and professional.',
-    camera:'Medium, static',light:'Warm',
-    dialog:[{who:'Kak Bizz',line:'Maaf ya. Kek ini hampir siap, jadi saya tak dapat ubah keseluruhan design. Tapi saya boleh ubah tulisan dan tambah sedikit hiasan tanpa menjejaskan tempahan lain.'},{who:'Customer',line:'Baiklah kak. Yang tu pun okey.'}]},
-   {n:7,t:'Order Dikemas Kini',dur:'7s',chars:['nurul','bizz'],core:'green',
-    action:'Bizz updates the order revision (writing changed, extra decoration added, main design kept) and records everything in the order history.',
-    camera:'Over-shoulder on hologram',light:'Warming',
-    dialog:[{who:'Bizz',line:'Perubahan dah direkodkan dalam sejarah tempahan.'}]},
-   {n:8,t:'Pickup',dur:'7s',chars:['nurul','customer'],core:'none',
-    action:'the customer arrives, looks at the cake and smiles, thanking Kak Bizz, who smiles with relief.',
-    camera:'Medium at counter',light:'Warm golden',
-    dialog:[{who:'Customer',line:'Cantik juga sebenarnya. Terima kasih kak sebab tolong.'}]},
-   {n:9,t:'Penutup',dur:'6s',chars:['nurul','bizz'],core:'purple',
-    action:'Kak Bizz sits with a coffee, Bizz floating beside her with its Core back to normal purple, sharing a gentle reflection.',
-    camera:'Medium 2-shot, static',light:'Warm coffee corner',
-    dialog:[{who:'Bizz',line:'Kadang-kadang, komunikasi yang jelas lebih penting daripada berkata ya kepada semua permintaan.'}]},
-   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',
-    action:'night; Kak Bizz rubs her shoulder tiredly and looks at the growing order list while Bizz reads out the day\'s work hours; the screen fades to black.',
-    camera:'Medium, static',light:'Dim warm night',
-    dialog:[{who:'Bizz',line:'Hari ini... 14 jam bekerja.'},{who:'Kak Bizz',line:'Penatnya...'}]}
- ]}
-];
-
-/* ---------- ASSEMBLY ---------- */
+/* ==================== ASSEMBLY ==================== */
 function buildPrompt(s){
-  const chars = s.chars.map(c=>IDENT[c]).filter(Boolean).join(' ');
+  const chars = (s.chars||[]).map(c=>IDENT[c]).filter(Boolean).join(' ');
   let dlg='';
   if(s.dialog && s.dialog.length){
-    dlg=' Dialogue — '+s.dialog.map(d=>`${d.who} says: "${d.line}"`).join(' ');
+    dlg=' Dialogue — '+s.dialog.map(d=>`${d.who||'Customer'} says: "${d.line}"`).join(' ');
   }
   const vo = s.vo ? ` Voice-over: "${s.vo}"` : '';
   const core = (s.core && s.core!=='none') ? ' '+CORE[s.core] : '';
-  return `${chars} SCENE: ${s.action}${dlg}${vo} ${s.camera}.${core} Lighting: ${s.light}. ${ENV} ${STYLE} ${QUALITY}`;
+  const cam = s.camera ? ` ${s.camera}.` : '';
+  const light = s.light ? ` Lighting: ${s.light}.` : '';
+  return `${chars} SCENE: ${s.action}${dlg}${vo}${cam}${core}${light} ${ENV} ${STYLE} ${QUALITY}`.replace(/\s+/g,' ').trim();
 }
 
-/* ---------- RENDER ---------- */
-const coreLabel={purple:'💜 Core Ungu',blue:'🔵 Core Biru',green:'🟢 Core Hijau',orange:'🟠 Core Oren',red:'🔴 Core Merah',none:'— tiada Bizz'};
+/* ==================== PARSER (ChatGPT -> scenes) ==================== */
+function detectCore(text){
+  const t=text.toLowerCase();
+  if(/core[^.]*merah|merah[^.]*core|kritikal/.test(t)) return 'red';
+  if(/core[^.]*oren|oren[^.]*core|low stock|amaran/.test(t)) return 'orange';
+  if(/core[^.]*hijau|hijau[^.]*core|berjaya|selesai|✅/.test(t)) return 'green';
+  if(/core[^.]*biru|biru[^.]*core|analis|semak|hologram/.test(t)) return 'blue';
+  if(/\bbizz\b|ai core|terapung/.test(t)) return 'purple';
+  return 'none';
+}
+function detectChars(text, speakers){
+  const t=text.toLowerCase(); const chars=[];
+  if(/kak bizz|nurul/.test(t)) chars.push('nurul');
+  const bizzSpeaker = speakers.some(s=>/^bizz$/i.test(s.trim()));
+  if(bizzSpeaker || /ai core|hologram|terapung|dashboard|projek|bizz (muncul|menunjuk|memapar|membantu|mengaktif)/.test(t)) chars.push('bizz');
+  if(/\bamir\b/.test(t)) chars.push('amir');
+  const custSpeaker = speakers.some(s=>/customer|pelanggan/i.test(s));
+  if(custSpeaker || /pelanggan|customer/.test(t)){
+    chars.push(/korporat|syarikat|corporate/.test(t)?'customerCorp':'customer');
+  }
+  return chars.filter((v,i,a)=>a.indexOf(v)===i);
+}
+function detectCamera(text){
+  const t=text.toLowerCase();
+  if(/close-?up|zoom|muka|wajah/.test(t)) return 'Close-up cinematic shot, slow push in';
+  if(/montaj|montage/.test(t)) return 'Dynamic cinematic montage, gentle cuts';
+  if(/wide|establish|keseluruhan bakery/.test(t)) return 'Wide establishing shot, slow push in';
+  if(/dashboard|hologram|skrin|screen/.test(t)) return 'Over-the-shoulder shot on the holographic dashboard';
+  return 'Medium cinematic shot, gentle slow camera movement';
+}
+function detectLight(text){
+  const t=text.toLowerCase();
+  if(/malam|night/.test(t)) return 'Warm night interior lighting';
+  if(/golden|lega|penutup|senyum lega/.test(t)) return 'Warm golden-hour light';
+  if(/panik|cemas|keliru|risau/.test(t)) return 'Cool grey overcast light';
+  if(/pagi|morning/.test(t)) return 'Warm natural morning light';
+  return 'Warm natural light';
+}
+function cleanLine(s){
+  return s.replace(/^#+\s*/,'').replace(/^\*+|\*+$/g,'').replace(/^\s*[-•]\s*/,'')
+          .replace(/[📱🤖💜💙🎥⏱️🎂🛒⚠️✔✅❌💰💸📦⚡💵📝🎬🎯🎭💡]/g,'').trim();
+}
+function parseEpisode(raw){
+  raw=raw.replace(/\r\n/g,'\n');
+  const lines=raw.split('\n');
+  // episode number + title
+  let epNum=''; const numM=raw.match(/Episod\s*(\d+)/i); if(numM) epNum=numM[1];
+  let title='Episod Baru';
+  for(const l of lines){
+    const hm=l.match(/^#+.*["“]([^"”]{3,70})["”]/);
+    if(hm){ title=hm[1].trim(); break; }
+  }
+  // split scenes
+  const scenes=[]; let cur=null; let stop=false;
+  const headerRe=/^#*\s*(?:🎥\s*)?Scene\s+(\d+)\s*[–—-]?\s*(.*)$/i;
+  const stopRe=/^#+\s*🎬|End Screen|Bizz Tips|Objektif Episod|^#+\s*🎯|^#+\s*🎭|Nilai emosi|Kenapa episod/i;
+  const boilerRe=/^(Fiq Sweet Bakery,|Bizz V2,|Nurul "Kak Bizz")/;
+  for(const line of lines){
+    if(stop) break;
+    const t=line.trim();
+    if(cur && (stopRe.test(t)||boilerRe.test(t))){ stop=true; break; }
+    const hm=t.match(headerRe);
+    if(hm){
+      if(cur) scenes.push(cur);
+      let rest=hm[2]||'';
+      let dur=''; const dm=rest.match(/\(([^)]*saat[^)]*)\)/i); if(dm) dur=dm[1].trim();
+      let name=rest.replace(/\(([^)]*)\)/,'').replace(/[–—-]\s*$/,'').replace(/^[–—-]\s*/,'').replace(/#+/g,'').trim();
+      cur={num:+hm[1], name:name||('Scene '+hm[1]), dur, rawlines:[]};
+    } else if(cur){
+      cur.rawlines.push(line);
+    }
+  }
+  if(cur && !stop) scenes.push(cur);
+  // process each scene
+  const out=scenes.map(sc=>{
+    const dialog=[]; let vo=''; const actionParts=[]; const speakers=[]; let lastSpeaker=null; let ctx='Kak Bizz';
+    for(const l of sc.rawlines){
+      const t=l.trim();
+      if(!t) continue;
+      if(/^⏱️/.test(t)){ if(!sc.dur){const d=t.match(/(\d+[^)\n]*saat)/i); if(d) sc.dur=d[1];} continue; }
+      const sp=t.match(/^\*\*(.+?)\*\*\s*$/);
+      if(sp){ const nm=sp[1].trim();
+        if(/voice\s*over|voice\s*o|narrator|narrat/i.test(nm)) lastSpeaker='__VO__';
+        else { lastSpeaker=nm; speakers.push(nm); }
+        continue;
+      }
+      const q=t.match(/^>\s*(.+)$/);
+      if(q){ let line=q[1].replace(/^\*+|\*+$/g,'').replace(/^["“]|["”]$/g,'').replace(/["“”]/g,'').trim();
+        if(!line) continue;
+        if(lastSpeaker==='__VO__'){ vo=vo?vo+' '+line:line; }
+        else if(lastSpeaker){ dialog.push({who:lastSpeaker, line}); }
+        else { dialog.push({who:ctx, line}); }
+        continue;
+      }
+      // section labels to skip
+      if(/^\**\s*(Visual|Dialog|Camera|Emosi|Voice Over|Framework|Durasi)\s*\**\s*$/i.test(t)){ lastSpeaker=null; continue; }
+      const c=cleanLine(t);
+      if(c && !/^[-–—.\s]+$/.test(c)) {
+        actionParts.push(c); lastSpeaker=null;
+        const low=c.toLowerCase();
+        if(/\bkak bizz\b|\bnurul\b/.test(low)) ctx='Kak Bizz';
+        else if(/\bbizz\b/.test(low)) ctx='Bizz';
+        else if(/customer|pelanggan/.test(low)) ctx='Customer';
+      }
+    }
+    const action=actionParts.join(' ').replace(/\s+/g,' ').trim();
+    const bigtext=action+' '+dialog.map(d=>(d.who||'')+' '+d.line).join(' ');
+    return {
+      n:sc.num, t:sc.name, dur:sc.dur||'',
+      chars:detectChars(bigtext, speakers),
+      core:detectCore(bigtext),
+      camera:detectCamera(action),
+      light:detectLight(bigtext),
+      action:action||'(sila lihat teks asal)',
+      dialog, vo:vo||null
+    };
+  });
+  return {ep:epNum||'?', title, feature:'(dijana auto)', scenes:out, generated:true};
+}
+
+/* ==================== RENDER ==================== */
 function copyText(txt,btn){
   const done=()=>{const o=btn.textContent;btn.textContent='✓ Disalin!';btn.classList.add('ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1400)};
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>fallback(txt,done))}
@@ -344,43 +272,24 @@ function copyText(txt,btn){
 }
 function fallback(txt,done){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta);done()}
 
-/* reference blocks */
-const refs=[['Nurul (Kak Bizz)',IDENT.nurul],['Bizz',IDENT.bizz],['Amir (sementara)',IDENT.amir],['Environment',ENV],['Visual Style',STYLE],['Quality',QUALITY]];
-const refbody=document.getElementById('refbody');
-refs.forEach(([name,txt])=>{
-  const d=document.createElement('div');d.className='refblock';
-  d.innerHTML=`<h4>${name}</h4><p>${txt}</p>`;
-  const b=document.createElement('button');b.className='copy ghost';b.textContent='Copy';b.style.marginTop='8px';
-  b.onclick=()=>copyText(txt,b);d.appendChild(b);refbody.appendChild(d);
-});
-
-/* tabs */
-const tabsEl=document.getElementById('tabs');
-const allBtn=document.createElement('button');allBtn.className='tab active';allBtn.textContent='Semua';
-allBtn.onclick=()=>filter('all',allBtn);tabsEl.appendChild(allBtn);
-EPISODES.forEach(e=>{const b=document.createElement('button');b.className='tab';b.textContent='Ep '+e.ep;
-  b.onclick=()=>filter(e.ep,b);tabsEl.appendChild(b)});
-function filter(ep,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
-  document.querySelectorAll('.epsec').forEach(sec=>{sec.style.display=(ep==='all'||+sec.dataset.ep===ep)?'':'none'})}
-
-/* episodes */
-const epc=document.getElementById('episodes');
-EPISODES.forEach(e=>{
-  const sec=document.createElement('div');sec.className='epsec';sec.dataset.ep=e.ep;
-  sec.innerHTML=`<div class="ephead">Episod ${e.ep}: ${e.title}<small>PocketBizz Feature: ${e.feature} · ${e.scenes.length} scene</small></div>`;
+function renderEpisode(e, container){
+  const sec=document.createElement('div');sec.className='epsec';sec.dataset.ep=e.ep;sec.dataset.gen=e.generated?'1':'0';
+  const flag=e.generated?'<span class="genflag">⚙️ Dijana auto</span>':'';
+  sec.innerHTML=`<div class="ephead"><div>Episod ${e.ep}: ${e.title}<small>${e.feature} · ${e.scenes.length} scene</small></div>${flag}</div>`;
   e.scenes.forEach(s=>{
     const card=document.createElement('div');card.className='card';
     let dlgHtml='';
-    if(s.dialog&&s.dialog.length)dlgHtml=s.dialog.map(d=>`<div><span class="who">${d.who}:</span> ${d.line}</div>`).join('');
+    if(s.dialog&&s.dialog.length)dlgHtml=s.dialog.map(d=>`<div><span class="who">${d.who||'Customer'}:</span> ${d.line}</div>`).join('');
     if(s.vo)dlgHtml+=`<div class="vo">VO: ${s.vo}</div>`;
+    const core=s.core||'none';
     card.innerHTML=`
       <div class="top">
         <span class="badge b-scene">Scene ${s.n}</span>
-        <span class="badge b-dur">${s.dur}</span>
-        <span class="badge b-core core-${s.core}">${coreLabel[s.core]}</span>
+        ${s.dur?`<span class="badge b-dur">${s.dur}</span>`:''}
+        <span class="badge b-core core-${core}">${coreLabel[core]||coreLabel.none}</span>
       </div>
-      <h3>${s.t}</h3>
-      <div class="meta"><span><b>Kamera:</b> ${s.camera}</span><span><b>Cahaya:</b> ${s.light}</span><span><b>Watak:</b> ${s.chars.map(c=>c==='customerCorp'?'customer':c).join(', ')}</span></div>
+      <h3>${s.t||''}</h3>
+      <div class="meta"><span><b>Kamera:</b> ${s.camera||'-'}</span><span><b>Cahaya:</b> ${s.light||'-'}</span><span><b>Watak:</b> ${(s.chars||[]).map(c=>c==='customerCorp'?'customer':c).join(', ')||'-'}</span></div>
       ${dlgHtml?`<div class="dlg">${dlgHtml}</div>`:''}
       <div class="btns"></div>
       <div class="promptbox"></div>`;
@@ -394,8 +303,132 @@ EPISODES.forEach(e=>{
     btns.appendChild(copyBtn);btns.appendChild(viewBtn);
     sec.appendChild(card);
   });
-  epc.appendChild(sec);
+  container.appendChild(sec);
+}
+
+/* ==================== BUILT-IN EPISODES (curated) ==================== */
+const EPISODES = [
+ {ep:1,title:'Tempahan Yang Hilang',feature:'Order Management',scenes:[
+   {n:1,t:'Pagi Yang Tenang',dur:'5s',chars:['nurul','bizz'],core:'purple',action:'at the cake decorating island, Kak Bizz focuses on decorating a chocolate drip cake while Bizz floats gently just above the counter watching her calmly.',camera:'Medium shot, slow push in',light:'Warm morning window light',dialog:[{who:'Bizz',line:'Selamat pagi, Kak Bizz! Hari ni nampak tenang.'},{who:'Kak Bizz',line:'Harap-harap macam tu lah.'}]},
+   {n:2,t:'Telefon Mula Berbunyi',dur:'5s',chars:['nurul'],core:'purple',action:'the smartphone on the counter rings repeatedly with WhatsApp notifications; Kak Bizz pauses decorating and glances at the phone, mildly surprised.',camera:'Close-up on the phone then her face',light:'Warm morning light',dialog:[{who:'Kak Bizz',line:'Eh... ramai pula WhatsApp pagi ni.'}]},
+   {n:3,t:'Kekeliruan Bermula',dur:'6s',chars:['nurul','bizz'],core:'orange',action:'the WhatsApp screen is full of overlapping customer messages about cake orders; Kak Bizz starts to look worried while Bizz observes the situation.',camera:'Over-shoulder on phone, slight push in',light:'Light softening cooler',dialog:[{who:'Customer',line:'Kak, kek saya pukul 10 ya?'},{who:'Customer',line:'Deposit dah transfer.'},{who:'Customer',line:'Saya nak tambah satu lagi.'}]},
+   {n:4,t:'Semua Berselerak',dur:'6s',chars:['nurul'],core:'none',action:'a messy desk with a notebook, sticky notes, a calendar and the WhatsApp phone all open at once, getting more cluttered; Kak Bizz\'s hands moving between them anxiously.',camera:'Top view of the cluttered table',light:'Cool grey overcast',vo:'Bila semuanya disimpan di tempat yang berbeza... mudah sangat ada yang tertinggal.'},
+   {n:5,t:'Customer Dah Sampai',dur:'5s',chars:['nurul'],core:'none',action:'the phone rings; Kak Bizz looks at the table where a cake is still unfinished, then freezes, stunned.',camera:'Zoom into her worried face',light:'Cool grey',dialog:[{who:'Customer',line:'Kak... saya dah sampai.'}]},
+   {n:6,t:'Bizz Muncul Membantu',dur:'7s',chars:['nurul','bizz'],core:'blue',action:'Bizz emerges as a hologram from the phone beside Kak Bizz and a PocketBizz dashboard appears, orders automatically sorting into a clean list.',camera:'Medium 2-shot, slow orbit',light:'Warm light with cool blue glow',dialog:[{who:'Bizz',line:'Tak apa Kak Bizz.'},{who:'Bizz',line:'Jom kita urus satu-satu.'}]},
+   {n:7,t:'Operasi Bermula',dur:'8s',chars:['nurul','bizz'],core:'blue',action:'Bizz points at a holographic dashboard checklist (Tempahan, Deposit, Prioriti, Masa siap) and Kak Bizz works through the list in a fast montage.',camera:'Over-shoulder on dashboard + medium montage',light:'Bright neutral',dialog:[{who:'Bizz',line:'Ikut senarai ni, semua terkawal.'}]},
+   {n:8,t:'Semua Berjalan Lancar',dur:'7s',chars:['nurul','bizz','customer'],core:'green',action:'the cake is finished and packed; a customer smiles receiving her cake box, Bizz gives a thumbs-up and Kak Bizz smiles with relief.',camera:'Medium at pickup counter',light:'Warm golden',dialog:[{who:'Kak Bizz',line:'Alhamdulillah, siap juga.'}]},
+   {n:9,t:'Penutup',dur:'6s',chars:['nurul','bizz'],core:'green',action:'Kak Bizz closes the bakery door, looks at her phone and Bizz waves cheerfully; she laughs softly.',camera:'Medium, slow pull out',light:'Golden hour',dialog:[{who:'Bizz',line:'Misi hari ini selesai.'}]},
+   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',action:'night time; Kak Bizz is about to rest when the phone chimes with a new order; she looks at Bizz who smiles knowingly, then the screen fades to black.',camera:'Close-up, static',light:'Warm night interior',dialog:[{who:'Bizz',line:'Esok... kita ada cabaran baru.'}]}
+ ]},
+ {ep:2,title:'Deposit Dah Masuk... Ke Belum?',feature:'Deposit & Payment Status',scenes:[
+   {n:1,t:'Hook',dur:'5s',chars:['nurul'],core:'purple',action:'morning; Kak Bizz is assembling a tiered birthday cake when the phone chimes with a customer message showing a reference photo; she smiles.',camera:'Medium, static',light:'Warm morning light',dialog:[{who:'Customer',line:'Kak, saya nak kek macam gambar ni ya.'},{who:'Kak Bizz',line:'InsyaAllah boleh.'}]},
+   {n:2,t:'Tempahan Disahkan',dur:'6s',chars:['nurul'],core:'none',action:'the customer sends order details (date, name, cake design); Kak Bizz writes them into her notebook and nods.',camera:'Medium + insert of notebook',light:'Warm neutral',dialog:[{who:'Customer',line:'Saya transfer deposit nanti ya.'},{who:'Kak Bizz',line:'Baik.'}]},
+   {n:3,t:'Hari Semakin Sibuk',dur:'7s',chars:['nurul','bizz'],core:'purple',action:'a busy montage: the mixer spins, a cake is decorated, WhatsApp messages arrive, the phone rings, Bizz watches calmly from above the counter.',camera:'Quick montage cuts',light:'Warm daytime',dialog:[]},
+   {n:4,t:'Hari Pengambilan',dur:'8s',chars:['nurul','customer'],core:'none',action:'a customer arrives smiling at the pickup counter; Kak Bizz picks up the cake box, then suddenly pauses, uncertain, touching her chin.',camera:'Medium 2-shot then close-up',light:'Neutral daylight',dialog:[{who:'Customer',line:'Kak, saya datang ambil kek.'},{who:'Kak Bizz',line:'Err... deposit dah masuk ke belum?'}]},
+   {n:5,t:'Mula Keliru',dur:'8s',chars:['nurul'],core:'none',action:'Kak Bizz nervously opens WhatsApp, online banking and her notebook one by one, checking each, getting more panicked.',camera:'Close-up, slow push in',light:'Cool grey',vo:'Bila semua pembayaran disimpan di tempat berbeza... memang mudah terlupa.'},
+   {n:6,t:'Bizz Membantu',dur:'8s',chars:['nurul','bizz'],core:'blue',action:'Bizz floats in beside the phone and projects the PocketBizz dashboard showing the payment status clearly marked "Deposit belum diterima", explaining calmly.',camera:'Over-shoulder on dashboard',light:'Cool with blue glow',dialog:[{who:'Bizz',line:'Tak mengapa, Kak Bizz. Mari saya semak.'}]},
+   {n:7,t:'Penyelesaian',dur:'8s',chars:['nurul','bizz','customer'],core:'green',action:'Kak Bizz smiles warmly at the customer, who scans a QR code to pay; the PocketBizz status flips to "Deposit diterima" with a green tick and Bizz\'s Core turns green.',camera:'Medium at counter + insert of QR',light:'Warming light',dialog:[{who:'Kak Bizz',line:'Tak apa ya. Deposit belum direkodkan lagi. Boleh buat pembayaran sekarang.'},{who:'Bizz',line:'Pembayaran berjaya direkodkan.'}]},
+   {n:8,t:'Penutup',dur:'7s',chars:['nurul','bizz'],core:'green',action:'the customer leaves happily with the cake; Kak Bizz breathes a sigh of relief with Bizz floating beside her.',camera:'Medium, slow pull out',light:'Warm golden',dialog:[{who:'Bizz',line:'Satu lagi urusan selesai.'}]},
+   {n:9,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'orange',action:'night; Kak Bizz is tidying the kitchen when a PocketBizz notification chimes: "Stok whipping cream tinggal 1 unit"; she looks at Bizz who smiles gently.',camera:'Medium, static',light:'Warm night interior',dialog:[{who:'Bizz',line:'Nampaknya... esok kita ada misi baru.'}]}
+ ]},
+ {ep:3,title:'Alamak... Tepung Dah Habis!',feature:'Inventory + Low Stock Alert',scenes:[
+   {n:1,t:'Cold Open',dur:'5s',chars:['nurul','bizz'],core:'orange',action:'morning; Kak Bizz arranges ingredients on the table while Bizz floats near the raw-material shelves, its Core turning slightly orange.',camera:'Wide, slow push in',light:'Warm morning light',dialog:[{who:'Bizz',line:'Selamat pagi, Kak Bizz. Ada satu perkara yang perlu diberi perhatian.'}]},
+   {n:2,t:'Tempahan Besar Masuk',dur:'7s',chars:['nurul','customerCorp'],core:'none',action:'the phone chimes with a corporate order for 10 cakes for a company event; Kak Bizz smiles happily and taps "Terima Tempahan" in the PocketBizz app.',camera:'Medium + insert of app',light:'Warm daytime',dialog:[{who:'Kak Bizz',line:'Alhamdulillah... rezeki pagi ni.'}]},
+   {n:3,t:'Semakan Stok',dur:'7s',chars:['nurul'],core:'none',action:'Kak Bizz goes to the ingredient shelf, picks up a flour container that is nearly empty, opens another that is empty, and her face changes with concern.',camera:'Medium + ECU on empty container',light:'Cooling light',dialog:[{who:'Kak Bizz',line:'Eh... tinggal sikit je?'}]},
+   {n:4,t:'AI Alert',dur:'8s',chars:['nurul','bizz'],core:'orange',action:'Bizz projects a holographic Low Stock Alert listing: flour very low, whipping cream critical, butter low; its Core glows orange.',camera:'Over-shoulder on hologram',light:'Cool with orange alert glow',dialog:[{who:'Bizz',line:'Nasib baik kita semak sebelum mula.'}]},
+   {n:5,t:'Makin Cemas',dur:'8s',chars:['nurul'],core:'none',action:'Kak Bizz looks at the clock (supplier not open yet, order due tomorrow), sits down for a moment and sighs.',camera:'Close-up, slow push in',light:'Deep cool',vo:'Kadang-kadang bukan tak cukup pelanggan... tetapi stok yang tak cukup.'},
+   {n:6,t:'Penyelesaian',dur:'9s',chars:['nurul','bizz'],core:'green',action:'Bizz opens the Inventory module and a purchase suggestion list appears (flour 25kg, butter, whipping cream) with quantities based on the accepted order.',camera:'Over-shoulder on hologram',light:'Warming with blue glow',dialog:[{who:'Bizz',line:'Senarai pembelian dah siap. Jom kita pergi supplier.'}]},
+   {n:7,t:'Montaj',dur:'8s',chars:['nurul','bizz'],core:'blue',action:'a cinematic montage: Kak Bizz buys stock, pushes a trolley, lifts flour, arranges stock on the shelves while Bizz scans each item and PocketBizz auto-updates the inventory.',camera:'Tracking + inserts',light:'Daytime bright',dialog:[]},
+   {n:8,t:'Bakery Kembali Hidup',dur:'7s',chars:['nurul','bizz'],core:'green',action:'next day; ingredients are fully stocked, the mixer spins, cakes bake and Kak Bizz smiles confidently.',camera:'Wide, slow push in',light:'Warm morning',dialog:[{who:'Bizz',line:'Sekarang kita dah bersedia.'}]},
+   {n:9,t:'Penutup',dur:'6s',chars:['nurul','customerCorp'],core:'none',action:'ten cakes are ready; the corporate customer collects them looking satisfied; Kak Bizz looks at the neatly organized shelves and nods with relief.',camera:'Medium at counter',light:'Golden hour',dialog:[]},
+   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'blue',action:'night; Kak Bizz sits at the office corner opening a sales report, frowning in confusion while Bizz looks at the dashboard.',camera:'Medium, static',light:'Warm night interior',dialog:[{who:'Kak Bizz',line:'Jualan banyak... tapi untung mana?'},{who:'Bizz',line:'Mungkin kita perlu semak kos sebenar.'}]}
+ ]},
+ {ep:4,title:'Jualan Banyak... Untung Ke Mana?',feature:'Profit & Loss / Costing',scenes:[
+   {n:1,t:'Cold Open',dur:'5s',chars:['nurul'],core:'none',action:'night; the quiet bakery, Kak Bizz sits at the office corner holding a coffee, opens her banking app then PocketBizz, looking confused.',camera:'Medium, slow push in',light:'Cool dim night',dialog:[{who:'Kak Bizz',line:'Order banyak... tapi duit macam tak bertambah pun...'}]},
+   {n:2,t:'Suami Masuk',dur:'7s',chars:['nurul','amir'],core:'none',action:'Amir enters carrying two cups of coffee and sits beside Kak Bizz warmly; she gives a thin smile.',camera:'Medium 2-shot',light:'Warm night interior',dialog:[{who:'Amir',line:'Alhamdulillah... bulan ni ramai order kan?'}]},
+   {n:3,t:'Soalan Yang Susah Dijawab',dur:'8s',chars:['nurul','amir'],core:'none',action:'Amir looks at the dashboard and calmly asks a hard question; Kak Bizz goes silent, unsure how to answer, a quiet moment.',camera:'Close-up on her face',light:'Warm dim',dialog:[{who:'Amir',line:'Jadi... untung bulan ni berapa?'}]},
+   {n:4,t:'Agitate',dur:'8s',chars:['nurul'],core:'none',action:'fast visuals of expenses being paid: flour, butter, cake boxes, electricity, gas, part-time worker — money flowing out.',camera:'Fast insert montage',light:'Neutral',vo:'Kadang-kadang kita ingat semua duit yang masuk itu untung... sedangkan sebahagian besar ialah kos.'},
+   {n:5,t:'Bizz Membantu',dur:'8s',chars:['nurul','amir','bizz'],core:'blue',action:'Bizz appears and projects a simple, easy-to-read Profit & Loss dashboard as a hologram beside them.',camera:'Medium 3-shot, slow orbit',light:'Warm with blue glow',dialog:[{who:'Bizz',line:'Jom kita lihat gambaran sebenar.'}]},
+   {n:6,t:'Pendedahan',dur:'10s',chars:['nurul','bizz'],core:'blue',action:'Bizz reveals a clear holographic summary — Jualan RM18,450, Kos Bahan RM8,700, Pembungkusan RM1,250, Utiliti RM620, Untung Bersih RM7,880 — and Kak Bizz understands.',camera:'Over-shoulder on hologram',light:'Warm with blue accents',dialog:[{who:'Kak Bizz',line:'Oh... patutlah...'}]},
+   {n:7,t:'AI Insight',dur:'8s',chars:['nurul','bizz'],core:'purple',action:'Bizz shows gentle suggestions about rising cake-box costs and higher premium-cake margins; Kak Bizz nods thoughtfully.',camera:'Medium, static',light:'Warm',dialog:[{who:'Bizz',line:'Kos kotak kek meningkat 18%. Margin kek premium lebih tinggi. Mungkin harga perlu dikaji semula.'}]},
+   {n:8,t:'Perubahan',dur:'7s',chars:['nurul'],core:'none',action:'a montage: Kak Bizz reviews her menu prices, updates ingredient costs and checks the daily report in PocketBizz, now more confident.',camera:'Inserts + medium',light:'Warm daytime',dialog:[]},
+   {n:9,t:'Penutup',dur:'6s',chars:['nurul','amir'],core:'none',action:'next morning; Amir asks again how the month is going and Kak Bizz answers confidently with a smile; Amir looks proud.',camera:'Medium 2-shot',light:'Warm morning',dialog:[{who:'Amir',line:'Macam mana bulan ni?'},{who:'Kak Bizz',line:'Alhamdulillah... sekarang saya tahu untung sebenar.'}]},
+   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',action:'the phone rings with a customer asking to change the cake design, though the cake is already half done; Kak Bizz looks at Bizz who gives a small knowing smile.',camera:'Medium, static',light:'Warm interior',dialog:[{who:'Customer',line:'Kak... boleh tukar design kek saya?'},{who:'Bizz',line:'Nampaknya... ada cabaran baru.'}]}
+ ]},
+ {ep:5,title:'Boleh Tukar Design Ke?',feature:'Order Revision / History',scenes:[
+   {n:1,t:'Cold Open',dur:'5s',chars:['nurul','bizz'],core:'purple',action:'a busy morning; Kak Bizz decorates a nearly-finished floral-theme cake while Bizz watches happily.',camera:'Medium, slow push in',light:'Warm morning',dialog:[{who:'Bizz',line:'Cantik hasilnya, Kak Bizz.'}]},
+   {n:2,t:'Mesej Mengejutkan',dur:'6s',chars:['nurul'],core:'none',action:'the phone chimes with a WhatsApp; Kak Bizz reads it twice and glances at the almost-finished cake in front of her.',camera:'Close-up on phone + her reaction',light:'Warm neutral',dialog:[{who:'Customer',line:'Kak... saya nak tukar design boleh?'}]},
+   {n:3,t:'Permintaan Bertambah',dur:'8s',chars:['nurul'],core:'none',action:'the customer sends a new reference photo and asks to change the colour and the writing too; Kak Bizz takes a long, deep breath.',camera:'Medium, static',light:'Cool grey',dialog:[{who:'Customer',line:'Yang ni lagi cantik. Warna pun nak tukar ya. Tulisan pun tukar sekali.'}]},
+   {n:4,t:'Agitate',dur:'8s',chars:['nurul','bizz'],core:'none',action:'a montage: Kak Bizz looks at the clock, four other orders are waiting, and Bizz displays today\'s schedule almost fully booked.',camera:'Inserts + over-shoulder schedule',light:'Neutral cool',vo:'Bukan semua perubahan boleh dibuat pada saat akhir. Kadang-kadang satu perubahan kecil memberi kesan kepada tempahan lain.'},
+   {n:5,t:'Bizz Menganalisis',dur:'8s',chars:['nurul','bizz'],core:'blue',action:'Bizz activates a hologram showing order status 95% done, 30 minutes to pickup, next order in 45 minutes, and explains the impact calmly.',camera:'Over-shoulder on hologram',light:'Cool with blue glow',dialog:[{who:'Bizz',line:'Jika design ditukar sekarang, dua tempahan lain akan lewat.'}]},
+   {n:6,t:'Penyelesaian Profesional',dur:'9s',chars:['nurul'],core:'none',action:'Kak Bizz calls the customer and gently offers a fair compromise, staying calm and professional.',camera:'Medium, static',light:'Warm',dialog:[{who:'Kak Bizz',line:'Maaf ya. Kek ini hampir siap, jadi saya tak dapat ubah keseluruhan design. Tapi saya boleh ubah tulisan dan tambah sedikit hiasan tanpa menjejaskan tempahan lain.'},{who:'Customer',line:'Baiklah kak. Yang tu pun okey.'}]},
+   {n:7,t:'Order Dikemas Kini',dur:'7s',chars:['nurul','bizz'],core:'green',action:'Bizz updates the order revision (writing changed, extra decoration added, main design kept) and records everything in the order history.',camera:'Over-shoulder on hologram',light:'Warming',dialog:[{who:'Bizz',line:'Perubahan dah direkodkan dalam sejarah tempahan.'}]},
+   {n:8,t:'Pickup',dur:'7s',chars:['nurul','customer'],core:'none',action:'the customer arrives, looks at the cake and smiles, thanking Kak Bizz, who smiles with relief.',camera:'Medium at counter',light:'Warm golden',dialog:[{who:'Customer',line:'Cantik juga sebenarnya. Terima kasih kak sebab tolong.'}]},
+   {n:9,t:'Penutup',dur:'6s',chars:['nurul','bizz'],core:'purple',action:'Kak Bizz sits with a coffee, Bizz floating beside her with its Core back to normal purple, sharing a gentle reflection.',camera:'Medium 2-shot, static',light:'Warm coffee corner',dialog:[{who:'Bizz',line:'Kadang-kadang, komunikasi yang jelas lebih penting daripada berkata ya kepada semua permintaan.'}]},
+   {n:10,t:'Cliffhanger',dur:'5s',chars:['nurul','bizz'],core:'purple',action:'night; Kak Bizz rubs her shoulder tiredly and looks at the growing order list while Bizz reads out the day\'s work hours; the screen fades to black.',camera:'Medium, static',light:'Dim warm night',dialog:[{who:'Bizz',line:'Hari ini... 14 jam bekerja.'},{who:'Kak Bizz',line:'Penatnya...'}]}
+ ]}
+];
+
+/* ==================== STATE + INIT ==================== */
+const LS_KEY='pb_generated_eps';
+function loadGenerated(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'[]')}catch(e){return[]}}
+function saveGenerated(arr){localStorage.setItem(LS_KEY,JSON.stringify(arr))}
+
+function renderAll(){
+  const genC=document.getElementById('genEpisodes');genC.innerHTML='';
+  const builtC=document.getElementById('episodes');builtC.innerHTML='';
+  const gen=loadGenerated();
+  gen.forEach(e=>renderEpisode(e,genC));
+  EPISODES.forEach(e=>renderEpisode(e,builtC));
+  buildTabs(gen);
+}
+function buildTabs(gen){
+  const tabsEl=document.getElementById('tabs');tabsEl.innerHTML='';
+  const mk=(label,val)=>{const b=document.createElement('button');b.className='tab';b.textContent=label;b.onclick=()=>filter(val,b);return b};
+  const all=mk('Semua','all');all.classList.add('active');tabsEl.appendChild(all);
+  gen.forEach(e=>tabsEl.appendChild(mk('Ep '+e.ep+' ⚙️','g'+e.ep)));
+  EPISODES.forEach(e=>tabsEl.appendChild(mk('Ep '+e.ep,e.ep)));
+}
+function filter(val,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('.epsec').forEach(sec=>{
+    let show=false;
+    if(val==='all')show=true;
+    else if(typeof val==='string'&&val[0]==='g')show=(sec.dataset.gen==='1'&&sec.dataset.ep===val.slice(1));
+    else show=(sec.dataset.gen==='0'&&+sec.dataset.ep===val);
+    sec.style.display=show?'':'none';
+  });
+}
+
+/* reference blocks */
+const refs=[['Nurul (Kak Bizz)',IDENT.nurul],['Bizz',IDENT.bizz],['Amir (sementara)',IDENT.amir],['Environment',ENV],['Visual Style',STYLE],['Quality',QUALITY]];
+const refbody=document.getElementById('refbody');
+refs.forEach(([name,txt])=>{
+  const d=document.createElement('div');d.className='refblock';
+  d.innerHTML=`<h4>${name}</h4><p>${txt}</p>`;
+  const b=document.createElement('button');b.className='copy ghost';b.textContent='Copy';b.style.marginTop='8px';
+  b.onclick=()=>copyText(txt,b);d.appendChild(b);refbody.appendChild(d);
 });
+
+/* generator wiring */
+document.getElementById('genBtn').onclick=()=>{
+  const raw=document.getElementById('rawInput').value.trim();
+  if(!raw){alert('Paste teks episod dulu.');return;}
+  const parsed=parseEpisode(raw);
+  if(!parsed.scenes.length){alert('Tak jumpa scene. Pastikan teks ada "Scene 1", "Scene 2", ... macam format ChatGPT.');return;}
+  const gen=loadGenerated();
+  const idx=gen.findIndex(e=>e.ep===parsed.ep);
+  if(idx>=0){ if(confirm('Episod '+parsed.ep+' dah wujud. Ganti?')) gen[idx]=parsed; else return; }
+  else gen.push(parsed);
+  gen.sort((a,b)=>(+a.ep||99)-(+b.ep||99));
+  saveGenerated(gen);renderAll();
+  document.getElementById('rawInput').value='';
+  window.scrollTo({top:document.getElementById('genEpisodes').offsetTop-70,behavior:'smooth'});
+};
+document.getElementById('clearInput').onclick=()=>{document.getElementById('rawInput').value='';};
+document.getElementById('clearGen').onclick=()=>{ if(confirm('Padam SEMUA episod dijana?')){saveGenerated([]);renderAll();} };
+
+renderAll();
 </script>
 </body>
 </html>
